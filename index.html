@@ -1,233 +1,502 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Idol Chat Space</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,"Microsoft YaHei",sans-serif;}
-body{
-  height:100vh;
-  background:linear-gradient(135deg,#0f172a,#1e293b,#7c3aed);
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  color:white;
-}
-.container{
-  width:1200px;
-  height:750px;
-  background:rgba(255,255,255,0.08);
-  backdrop-filter:blur(12px);
-  border-radius:20px;
-  display:flex;
-  overflow:hidden;
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Idol Chat - 与爱豆的私密对话</title>
+    <style>
+        :root {
+            --primary-color: #ff9a9e; /* 柔和的粉色系，符合RIIZE氛围 */
+            --bg-color: #f5f5f5;
+            --chat-bg: #ffffff;
+            --user-bubble: #ffe4e1;
+            --idol-bubble: #f0f0f0;
+            --text-color: #333;
+        }
 
-/* 左侧idol列表 */
-.sidebar{
-  width:300px;
-  background:rgba(0,0,0,0.25);
-  padding:20px;
-  overflow-y:auto;
-}
-.sidebar h2{
-  text-align:center;
-  margin-bottom:20px;
-}
-.idol{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  padding:12px;
-  border-radius:12px;
-  cursor:pointer;
-  margin-bottom:10px;
-  transition:0.3s;
-}
-.idol:hover{
-  background:rgba(255,255,255,0.15);
-}
-.idol img{
-  width:55px;
-  height:55px;
-  border-radius:50%;
-  object-fit:cover;
-}
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
 
-/* 聊天区 */
-.chat-area{
-  flex:1;
-  display:flex;
-  flex-direction:column;
-}
+        body {
+            background-color: var(--bg-color);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
 
-.chat-header{
-  height:80px;
-  background:rgba(255,255,255,0.1);
-  display:flex;
-  align-items:center;
-  padding:20px;
-  gap:15px;
-}
-.chat-header img{
-  width:55px;
-  height:55px;
-  border-radius:50%;
-}
+        /* 手机容器模拟 */
+        #app {
+            width: 100%;
+            max-width: 400px;
+            height: 100%;
+            max-height: 850px;
+            background: white;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
 
-.chat-box{
-  flex:1;
-  padding:20px;
-  overflow-y:auto;
-}
+        /* --- 选择界面 --- */
+        #selection-screen {
+            padding: 20px;
+            overflow-y: auto;
+            height: 100%;
+            background: linear-gradient(180deg, #fff5f5 0%, #ffffff 100%);
+        }
 
-.message{
-  display:flex;
-  margin-bottom:20px;
-  align-items:flex-start;
-}
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            margin-top: 20px;
+        }
 
-.message img{
-  width:45px;
-  height:45px;
-  border-radius:50%;
-}
+        .header h1 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 5px;
+        }
 
-.bubble{
-  max-width:60%;
-  padding:12px 16px;
-  border-radius:16px;
-  margin:0 10px;
-}
+        .header p {
+            color: #888;
+            font-size: 14px;
+        }
 
-.idol-msg .bubble{
-  background:#9333ea;
-}
+        .group-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 20px 0 10px 0;
+            color: #555;
+            border-left: 4px solid var(--primary-color);
+            padding-left: 10px;
+        }
 
-.user-msg{
-  justify-content:flex-end;
-}
+        .idol-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
 
-.user-msg .bubble{
-  background:#2563eb;
-}
+        .idol-card {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
 
-.input-area{
-  height:80px;
-  display:flex;
-  padding:15px;
-  gap:10px;
-  background:rgba(255,255,255,0.08);
-}
+        .idol-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
 
-input{
-  flex:1;
-  border:none;
-  border-radius:12px;
-  padding:12px;
-  font-size:16px;
-}
+        .idol-img {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 10px;
+            border: 2px solid var(--primary-color);
+        }
 
-button{
-  width:100px;
-  border:none;
-  border-radius:12px;
-  background:#ec4899;
-  color:white;
-  font-size:16px;
-  cursor:pointer;
-}
-</style>
+        .idol-name {
+            font-weight: bold;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .idol-group {
+            font-size: 12px;
+            color: #999;
+            margin-top: 2px;
+        }
+
+        /* --- 聊天界面 --- */
+        #chat-screen {
+            display: none; /* 默认隐藏 */
+            flex-direction: column;
+            height: 100%;
+            background-color: #efeae2; /* 聊天背景色 */
+            background-image: radial-gradient(#dcd6cc 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .chat-header {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            backdrop-filter: blur(5px);
+            z-index: 10;
+        }
+
+        .back-btn {
+            font-size: 20px;
+            margin-right: 15px;
+            cursor: pointer;
+            color: #555;
+        }
+
+        .chat-header-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header-name {
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .chat-header-status {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 75%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            font-size: 15px;
+            line-height: 1.4;
+            position: relative;
+            word-wrap: break-word;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.idol {
+            align-self: flex-start;
+            background-color: white;
+            border-bottom-left-radius: 4px;
+            color: #333;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .message.idol::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: -8px;
+            width: 12px;
+            height: 12px;
+            background: white;
+            border-bottom-left-radius: 10px;
+            clip-path: polygon(0 0, 0% 100%, 100% 100%); /* 简单的三角形尾巴模拟 */
+        }
+        
+        .message.idol .sender-name {
+            font-size: 11px;
+            color: #999;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background-color: var(--primary-color);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-input-area {
+            background: white;
+            padding: 15px;
+            display: flex;
+            gap: 10px;
+            border-top: 1px solid #ddd;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px;
+            border-radius: 25px;
+            border: 1px solid #ddd;
+            outline: none;
+            background: #f9f9f9;
+        }
+
+        .send-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .send-btn:hover {
+            background: #ff8085;
+        }
+
+        /* 头像样式复用 */
+        .avatar-small {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 10px;
+        }
+        
+        .typing-indicator {
+            font-size: 12px;
+            color: #888;
+            margin-left: 60px;
+            margin-bottom: 10px;
+            display: none;
+            font-style: italic;
+        }
+
+    </style>
 </head>
 <body>
 
-<div class="container">
+<div id="app">
+    <!-- 1. 选择界面 -->
+    <div id="selection-screen">
+        <div class="header">
+            <h1>Idol Chat</h1>
+            <p>选择你想聊天的爱豆</p>
+        </div>
 
-  <div class="sidebar">
-    <h2>选择你的 Idol</h2>
+        <div class="group-title">RIIZE</div>
+        <div class="idol-grid" id="riize-grid">
+            <!-- JS will populate this -->
+        </div>
 
-    <div class="idol" onclick="selectIdol('Mark (NCT)','https://via.placeholder.com/100?text=Mark')">
-      <img src="https://via.placeholder.com/100?text=Mark">
-      <span>Mark（NCT）</span>
+        <div class="group-title">NCT</div>
+        <div class="idol-grid" id="nct-grid">
+            <!-- JS will populate this -->
+        </div>
+        
+        <div class="group-title">TXT</div>
+        <div class="idol-grid" id="txt-grid">
+            <!-- JS will populate this -->
+        </div>
     </div>
 
-    <div class="idol" onclick="selectIdol('Wonbin (RIIZE)','https://via.placeholder.com/100?text=Wonbin')">
-      <img src="https://via.placeholder.com/100?text=Wonbin">
-      <span>Wonbin（RIIZE）</span>
+    <!-- 2. 聊天界面 -->
+    <div id="chat-screen">
+        <div class="chat-header">
+            <div class="back-btn" onclick="goBack()">←</div>
+            <img src="" alt="Avatar" class="avatar-small" id="chat-header-img">
+            <div class="chat-header-info">
+                <span class="chat-header-name" id="chat-header-name">Name</span>
+                <span class="chat-header-status">Online</span>
+            </div>
+        </div>
+
+        <div class="chat-messages" id="chat-messages">
+            <!-- Messages go here -->
+        </div>
+        
+        <div class="typing-indicator" id="typing-indicator">对方正在输入...</div>
+
+        <div class="chat-input-area">
+            <input type="text" class="chat-input" id="user-input" placeholder="输入消息..." onkeypress="handleKeyPress(event)">
+            <button class="send-btn" onclick="sendMessage()">发送</button>
+        </div>
     </div>
-
-    <div class="idol" onclick="selectIdol('Yeonjun (TXT)','https://via.placeholder.com/100?text=Yeonjun')">
-      <img src="https://via.placeholder.com/100?text=Yeonjun">
-      <span>Yeonjun（TXT）</span>
-    </div>
-  </div>
-
-  <div class="chat-area">
-    <div class="chat-header">
-      <img id="idolAvatar" src="https://via.placeholder.com/100?text=Idol">
-      <h2 id="idolName">请选择一个 Idol 开始聊天</h2>
-    </div>
-
-    <div class="chat-box" id="chatBox"></div>
-
-    <div class="input-area">
-      <input type="text" id="userInput" placeholder="输入你想对idol说的话...">
-      <button onclick="sendMessage()">发送</button>
-    </div>
-  </div>
-
 </div>
 
 <script>
-let currentIdol = "";
+    // --- 数据配置 ---
+    
+    // 注意：请将下面的图片URL替换为你实际的图片路径
+    // 用户提供的Sungchan图片
+    const sungchanImg = 'https://i.imgur.com/8QzXJyL.jpeg'; // 这里我放了一个占位图，请替换成你的本地路径或网络链接
+    
+    // 其他成员占位图 (使用默认头像生成器)
+    const defaultImg = 'https://ui-avatars.com/api/?background=random&color=fff&name=';
 
-const personaReplies = {
-  "Mark (NCT)": "哈哈你这样说让我有点害羞，不过还是很开心和你聊天～",
-  "Wonbin (RIIZE)": "你今天过得怎么样？记得好好吃饭，我会担心的。",
-  "Yeonjun (TXT)": "你真的很有趣诶，再多和我聊聊吧 :)"
-};
+    const idols = [
+        {
+            id: 'sungchan',
+            name: 'Sungchan',
+            group: 'RIIZE',
+            img: sungchanImg, 
+            persona: {
+                keywords: ['谢谢', '感谢', 'thanks', '早安', '早上好', '晚安', '累', '辛苦', '吃饭', '面包', '咖啡', '练习'],
+                responses: [
+                    "为什么要跟我说谢谢呀？应该是我谢谢BRIIZE才对！因为有你们我才能站在这里。",
+                    "早安！今天天气好像不错，记得吃早餐哦，我正准备去练习室。",
+                    "辛苦啦！我也刚结束练习，虽然有点累，但是想到能见到你们就充满了力量。快去休息吧，不要熬夜。",
+                    "刚去了一家很棒的咖啡厅，面包超级好吃！下次带BRIIZE一起来。",
+                    "我会继续努力的！为了不辜负大家的期待。",
+                    "今天过得怎么样？有没有发生什么开心的事？",
+                    "看到你发的消息感觉充满了能量！你是我的小太阳吗？哈哈。",
+                    "虽然有时候会有点辛苦，但只要想到有BRIIZE在支持我，我就什么都不怕了。",
+                    "嘿嘿，被你发现了。其实我刚偷偷吃了一块曲奇。",
+                    "不要担心我，我会照顾好自己的。你也要照顾好自己哦！"
+                ],
+                defaultResponse: [
+                    "嗯嗯！我在听呢。",
+                    "真的吗？好有趣。",
+                    "我也这么觉得！",
+                    "哈哈，你太可爱了。",
+                    "我会一直记得的。"
+                ]
+            }
+        },
+        { id: 'shotaro', name: 'Shotaro', group: 'RIIZE', img: defaultImg + 'Shotaro' },
+        { id: 'wonbin', name: 'Wonbin', group: 'RIIZE', img: defaultImg + 'Wonbin' },
+        { id: 'jaehyun', name: 'Jaehyun', group: 'NCT', img: defaultImg + 'Jaehyun' },
+        { id: 'mark', name: 'Mark', group: 'NCT', img: defaultImg + 'Mark' },
+        { id: 'yeonjun', name: 'Yeonjun', group: 'TXT', img: defaultImg + 'Yeonjun' },
+        { id: 'soobin', name: 'Soobin', group: 'TXT', img: defaultImg + 'Soobin' }
+    ];
 
-function selectIdol(name, avatar){
-  currentIdol = name;
-  document.getElementById('idolName').innerText = name;
-  document.getElementById('idolAvatar').src = avatar;
+    let currentIdol = null;
 
-  document.getElementById('chatBox').innerHTML = `
-    <div class="message idol-msg">
-      <img src="${avatar}">
-      <div class="bubble">Hi~ 我是 ${name}，今天想聊什么？</div>
-    </div>
-  `;
-}
+    // --- 初始化 ---
+    window.onload = function() {
+        renderIdols();
+    };
 
-function sendMessage(){
-  const input = document.getElementById('userInput');
-  const text = input.value.trim();
-  if(!text || !currentIdol) return;
+    function renderIdols() {
+        const riizeGrid = document.getElementById('riize-grid');
+        const nctGrid = document.getElementById('nct-grid');
+        const txtGrid = document.getElementById('txt-grid');
 
-  const chatBox = document.getElementById('chatBox');
+        idols.forEach(idol => {
+            const card = document.createElement('div');
+            card.className = 'idol-card';
+            card.onclick = () => startChat(idol.id);
+            card.innerHTML = `
+                <img src="${idol.img}" alt="${idol.name}" class="idol-img">
+                <div class="idol-name">${idol.name}</div>
+                <div class="idol-group">${idol.group}</div>
+            `;
 
-  // 用户消息（使用你上传的头像）
-  chatBox.innerHTML += `
-    <div class="message user-msg">
-      <div class="bubble">${text}</div>
-      <img src="半身照.jpg">
-    </div>
-  `;
+            if (idol.group === 'RIIZE') riizeGrid.appendChild(card);
+            else if (idol.group === 'NCT') nctGrid.appendChild(card);
+            else if (idol.group === 'TXT') txtGrid.appendChild(card);
+        });
+    }
 
-  setTimeout(()=>{
-    chatBox.innerHTML += `
-      <div class="message idol-msg">
-        <img src="${document.getElementById('idolAvatar').src}">
-        <div class="bubble">${personaReplies[currentIdol]}</div>
-      </div>
-    `;
-    chatBox.scrollTop = chatBox.scrollHeight;
-  },1000);
+    // --- 聊天逻辑 ---
 
-  input.value='';
-}
+    function startChat(idolId) {
+        currentIdol = idols.find(i => i.id === idolId);
+        
+        // 切换界面
+        document.getElementById('selection-screen').style.display = 'none';
+        document.getElementById('chat-screen').style.display = 'flex';
+
+        // 设置头部信息
+        document.getElementById('chat-header-img').src = currentIdol.img;
+        document.getElementById('chat-header-name').innerText = currentIdol.name;
+
+        // 清空并添加欢迎语
+        const chatBox = document.getElementById('chat-messages');
+        chatBox.innerHTML = '';
+        
+        // 如果是Sungchan，发送特定的欢迎语
+        if (currentIdol.id === 'sungchan') {
+            addMessage('idol', "嗨！BRIIZE！今天过得怎么样？刚刚结束练习，正想找你聊聊呢。");
+        } else {
+            addMessage('idol', `嗨！我是${currentIdol.name}。想聊点什么？`);
+        }
+    }
+
+    function goBack() {
+        document.getElementById('chat-screen').style.display = 'none';
+        document.getElementById('selection-screen').style.display = 'block';
+        currentIdol = null;
+    }
+
+    function handleKeyPress(event) {
+        if (event.key === 'Enter') {
+            sendMessage();
+        }
+    }
+
+    function sendMessage() {
+        const input = document.getElementById('user-input');
+        const text = input.value.trim();
+        
+        if (!text) return;
+
+        // 1. 添加用户消息
+        addMessage('user', text);
+        input.value = '';
+
+        // 2. 模拟对方正在输入
+        const typingIndicator = document.getElementById('typing-indicator');
+        typingIndicator.style.display = 'block';
+        document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
+
+        // 3. 延迟回复 (模拟思考时间)
+        setTimeout(() => {
+            typingIndicator.style.display = 'none';
+            const reply = generateReply(text);
+            addMessage('idol', reply);
+        }, 1500 + Math.random() * 1000); // 1.5s - 2.5s 随机延迟
+    }
+
+    function addMessage(sender, text) {
+        const chatBox = document.getElementById('chat-messages');
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `message ${sender}`;
+        
+        if (sender === 'idol') {
+            // 偶像的消息包含名字标签（可选，这里为了简洁只加在第一条或者特定情况，这里简化处理）
+            msgDiv.innerHTML = `<span class="sender-name">${currentIdol.name}</span>${text}`;
+        } else {
+            msgDiv.innerText = text;
+        }
+
+        chatBox.appendChild(msgDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // --- 核心AI逻辑 (基于关键词匹配) ---
+    function generateReply(userText) {
+        if (!currentIdol || !currentIdol.persona) {
+            return "这是一个模拟回复。";
+        }
+
+        const persona = currentIdol.persona;
+        const lowerText = userText.toLowerCase();
+
+        // 检查是否包含关键词
+        for (let keyword of persona.keywords) {
+            if (lowerText.includes(keyword.toLowerCase())) {
+                // 随机返回一个相关回复
+                const randomIndex = Math.floor(Math.random() * persona.responses.length);
+                return persona.responses[randomIndex];
+            }
+        }
+
+        // 如果没有匹配关键词，返回默认回复
+        const randomIndex = Math.floor(Math.random() * persona.defaultResponse.length);
+        return persona.defaultResponse[randomIndex];
+    }
+
 </script>
 
 </body>
